@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>React - Hello World!</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+</head>
+<body>
+	<script type="text/babel">
+		var Content = React.createClass({
+			render : function(){
+				return (
+					<div>
+						<AppHeading title={this.props.input.title}/>
+						<AppMessage message={this.props.input.message}/>
+					</div>
+				);
+			}
+		});
+		var AppHeading = React.createClass({
+			render : function(){
+				return (<h1>{this.props.title}</h1>);
+			}
+		})
+		var AppMessage = React.createClass({
+			render : function(){
+				return (<h3>{this.props.message}</h3>)
+			}
+		})
+		var data = {
+			title : "Welcome to React",
+			message : "A fascinating way of building apps in React.js awaits you!"
+		};
+
+		ReactDOM.render(<Content input={data}/>, document.body);
+	</script>
+</body>
+</html>
+
+<!-- ReactDOM.render(<div><h1> Hello World  </h1><h3>A fascinating way of building apps await you!!</h3></div>, document.body); -->
+
+<!-- React.createElement("div", {}, 
+				React.createElement("h1", {}, "Hello World"),
+				React.createElement("h3", {}, "A fascinating way of building apps awaits you!!")
+			) -->

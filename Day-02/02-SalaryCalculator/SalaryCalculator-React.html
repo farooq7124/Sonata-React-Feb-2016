@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Salary Calculator</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+	<style type="text/css">
+		.field{
+			margin-bottom: 10px;
+		}
+		label{
+			display: block;
+		}
+		#divResult{
+			color : red;
+			font-size: 22pt;
+			font-weight: bold;
+		}
+
+	</style>
+	
+	<script>
+		String.prototype.toInt = function(){
+			return parseInt(this,10);
+		};
+		//state and behavior of a calculator
+		//Model
+		function SalaryCalculator(){
+			var _data = {
+				basic : 0,
+				hra : 0,
+				da : 0,
+				tax  : 0,
+				salary : 0
+			};
+			this.toJSON = function(){
+				return JSON.parse(JSON.stringify(_data));
+			};
+
+			this.get = function(attrName){
+				return _data[attrName];
+			};
+			this.set = function(attrName, value){
+				if (_data[attrName] === value) return;
+				_data[attrName] = value;
+				//trigger change notification
+				triggerChangeFor(attrName);
+				triggerChangeFor('all');
+ 			};
+ 			function triggerChangeFor(attrName){
+ 				var eventHandlerFns = _eventHandlers[attrName];
+				eventHandlerFns.forEach(function(eventHandlerFn){
+					if (typeof eventHandlerFn === 'function')
+						eventHandlerFn();	
+				})
+				
+ 			}
+
+ 			var _eventHandlers = {
+ 				basic : [],
+ 				hra : [],
+ 				da : [],
+ 				tax : [],
+ 				salary : [],
+ 				all : []
+ 			};
+
+ 			this.onChange = function(attrName, eventHandlerFn){
+ 				_eventHandlers[attrName].push(eventHandlerFn);
+ 			}
+
+		}
+		SalaryCalculator.prototype.calculate = function(){
+			var gross = this.get('basic') + this.get('hra') + this.get('da');
+			var net = gross * ((100-this.get('tax'))/100);
+			this.set('salary' , net);
+		}
+
+		
+
+	</script>
+	<script type="text/template" id="calculatorTemplate">
+		
+	</script>
+</head>
+<body>
+	<h1>Salary Calculator</h1>
+	
+	<script type="text/babel">
+		var SalaryCalculatorView = React.createClass({
+			updateBasic : function(){
+				this.props.setValue('basic', this.refs.txtBasic.value.toInt())
+			},
+			updateHra : function(){
+				this.props.setValue('hra', this.refs.txtHra.value.toInt())
+			},
+			updateDa : function(){
+				this.props.setValue('da', this.refs.txtDa.value.toInt())
+			},
+			updateTax : function(){
+				this.props.setValue('tax', this.refs.rangeTax.value.toInt())
+			},
+			triggerCalculate : function(){
+				this.props.calculate();
+			},
+			render : function(){
+				return (<div>
+					<div className="field">
+						<label>Basic :</label>
+						<input type="text" ref="txtBasic" value={this.props.calculator.basic} onChange={this.updateBasic}/>
+					</div>
+					<div className="field">
+						<label >HRA :</label>
+						<input type="text" ref="txtHra" value={this.props.calculator.hra} onChange={this.updateHra}/>
+					</div>
+					<div className="field">
+						<label >DA :</label>
+						<input type="text" ref="txtDa" value={this.props.calculator.da} onChange={this.updateDa}/>
+					</div>
+					<div className="field">
+						<label >Tax :</label>
+						<input type="range" ref="rangeTax" min="0" max="30" value={this.props.calculator.tax} onChange={this.updateTax}/>
+						<span id="spanTax">{this.props.calculator.tax}</span>
+					</div>
+					<div className="field">
+						<input type="button" value="Calculate" id="btnCalculate" onClick={this.triggerCalculate}/>
+					</div>
+					<div className="field">
+						<div id="divResult">{this.props.calculator.salary}</div>
+					</div>
+				</div>
+			);
+			}
+		});
+		window.calculator = new SalaryCalculator();
+		function setValue(attrName, value){
+			calculator.set(attrName, value);
+		}
+		function calculate(){
+			calculator.calculate();
+		}
+		calculator.onChange('all', function(){
+			var calculatorData = calculator.toJSON();
+			console.log(calculatorData);
+			ReactDOM.render(<SalaryCalculatorView calculator={calculatorData} setValue={setValue} calculate={calculate}/>, document.body);
+		});
+		var calculatorData = calculator.toJSON();
+		ReactDOM.render(<SalaryCalculatorView calculator={calculatorData} setValue={setValue} calculate={calculate}/>, document.body);
+		
+	</script>
+	</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>React - Hello World!</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+	<style type="text/css">
+		input{
+			margin: 10px;
+		}
+	</style>
+</head>
+<body>
+	<script type="text/babel">
+		var Timer = React.createClass({
+			componentDidMount : function(){
+
+				setInterval(function(){
+					this.setState({
+						currentTime : new Date().toString()
+					});
+				}.bind(this),1000);
+			},
+			getInitialState : function(){
+				
+				return {
+					currentTime : new Date().toString()
+				};
+
+			},
+			render : function(){
+				return (<div>{this.state.currentTime}</div>);
+			}
+		});
+		var Spinner = React.createClass({
+			getInitialState : function(){
+				return {
+					value : 0
+				};
+			},
+			increment : function(){
+				this.setState({value : ++this.state.value});
+			},
+			
+			render : function(){
+				return (<div>
+					<input type="button" value="Down" />
+					<span>{this.state.value}</span>
+					<input type="button" value="Up" onClick={this.increment}/>
+					
+				</div>);
+			}
+		})
+
+		ReactDOM.render(<div>
+			<Spinner />
+			<Timer />
+		</div>, document.body);
+	</script>
+</body>
+</html>
