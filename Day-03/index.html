@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="browser.min.js"></script>
+	<script type="text/javascript">
+		/*Use Cases*/
+		/*
+		1. List the bugs
+		2. Add a new bug
+		3. Toggle the closed status of the bug
+		4. Remove closed bugs
+		5. Display stats (closed bugs / open bugs)
+		*/
+	</script>
+	<style type="text/css">
+	.statistics{
+		font-size: 18pt;
+	}
+	.closed{
+		color : red;
+		text-decoration: line-through;
+		font-style: italic;
+		font-weight: bold;
+	}
+	li{
+		cursor: pointer;
+	}
+	</style>
+
+	<script type="text/babel">
+		function BugStore(){
+			var bugs = [
+				{id : 1, name : 'Data validation failure', isClosed : false},
+				{id : 2, name : 'Server communication interupts', isClosed : true},
+				{id : 3, name : 'User actions not recognized', isClosed : false}
+			];
+			function addNew(bugName){
+				var newBug = {
+					id : bugs.length + 1,
+					name :bugName,
+					isClosed : false
+				};
+				bugs.push(newBug);
+				if (this.onChange) this.onChange();
+			}
+			return{
+				bugs : bugs,
+				addNew : addNew,
+				onChange : null
+			}
+		}
+
+		var bugStore = new BugStore();
+		
+
+		var App = React.createClass({
+			render : function(){
+				return (<div>
+					<BugStats bugs = {this.props.store.bugs}/>
+					<BugList store = {this.props.store}/>
+				</div>);
+			}
+		});
+
+		var BugStats = React.createClass({
+			render : function(){
+				return (
+					<div className="statistics">
+						<span className="closed">2</span>
+						<span>/</span>
+						<span>{this.props.bugs.length}</span>
+					</div>
+				);
+			}
+		});
+
+		var BugList = React.createClass({
+			addBug : function(evt){
+				this.props.store.addNew(this.refs.bugName.value);
+				console.log(this.props.store.bugs);
+			},
+			render : function(){
+				console.log(this.props);
+					var bugs = this.props.store.bugs;
+					var list = bugs.map(function(bug){
+						return <li key={bug.id}>{bug.name}</li>;
+					});
+					console.log(list);
+				return (
+					
+					<div className="list">
+						<label htmlFor="">Bug :</label>
+						<input type="text" ref="bugName"/>
+						<input type="button" value="Add New" onClick={this.addBug} />
+						<input type="button" value="Remove Closed" />
+						<ol>
+							{list}
+						</ol>
+					</div>
+				);
+			}
+		});
+
+		function Provider(){
+			this.render = function(){
+				ReactDOM.render(<App store={this.store}/>, document.getElementById("content"));
+			};
+			this.store = new BugStore();
+			this.store.onChange = function(){
+				this.render();
+			}.bind(this);
+		}
+		var provider = new Provider();
+		provider.render();
+		
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<div id="content">
+		
+		
+	</div>
+	<script type="text/babel">
+		
+	</script>
+</body>
+</html>
