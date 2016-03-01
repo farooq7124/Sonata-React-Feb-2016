@@ -38,13 +38,8 @@
 				{id : 2, name : 'Server communication interupts', isClosed : true},
 				{id : 3, name : 'User actions not recognized', isClosed : false}
 			];
-			function addNew(bugName){
-				var newBug = {
-					id : bugs.length + 1,
-					name :bugName,
-					isClosed : false
-				};
-				bugs.push(newBug);
+			function addNew(newBug){
+				this.bugs.push(newBug);
 				if (this.onChange) this.onChange();
 			}
 			return{
@@ -61,7 +56,7 @@
 			render : function(){
 				return (<div>
 					<BugStats bugs = {this.props.store.bugs}/>
-					<BugList store = {this.props.store}/>
+					<BugList store = {this.props.store} dispatcher={this.props.dispatcher}/>
 				</div>);
 			}
 		});
@@ -80,13 +75,14 @@
 
 		var BugList = React.createClass({
 			addBug : function(evt){
-				this.props.store.addNew(this.refs.bugName.value);
-				console.log(this.props.store.bugs);
+				dispatcher.dispatch(createAddAction(this.refs.bugName.value));
 			},
 			render : function(){
 				console.log(this.props);
 					var bugs = this.props.store.bugs;
 					var list = bugs.map(function(bug){
+						if (bug.isClosed)
+							return <li key={bug.id} className="closed">{bug.name}</li>;
 						return <li key={bug.id}>{bug.name}</li>;
 					});
 					console.log(list);
@@ -105,16 +101,42 @@
 			}
 		});
 
-		function Provider(){
+		function createAddAction(bugName){
+			return {
+				type : 'ADD_NEW',
+				bugName : bugName
+			}
+		};
+
+		function Dispatcher(reducer, store){
+			this.dispatch = function(action){
+				reducer(action, store);
+			}
+		}
+
+		function bugsReducer(action, store){
+			if (action.type === 'ADD_NEW'){
+				var newBug = {
+					id : store.bugs.length + 1,
+					name :action.bugName,
+					isClosed : false
+				};
+				store.addNew(newBug);
+			}
+		}
+
+		function Provider(dispatcher, store){
 			this.render = function(){
-				ReactDOM.render(<App store={this.store}/>, document.getElementById("content"));
+				ReactDOM.render(<App store={this.store} dispatcher={dispatcher}/>, document.getElementById("content"));
 			};
-			this.store = new BugStore();
+			this.store = store;
 			this.store.onChange = function(){
 				this.render();
 			}.bind(this);
 		}
-		var provider = new Provider();
+		var store = new BugStore();
+		var dispatcher = new Dispatcher(bugsReducer, store);
+		var provider = new Provider(dispatcher, store);
 		provider.render();
 		
 	</script>
